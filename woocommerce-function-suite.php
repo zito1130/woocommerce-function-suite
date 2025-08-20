@@ -15,43 +15,23 @@ define('WFS_PLUGIN_URL', plugin_dir_url(__FILE__));
 require_once WFS_PLUGIN_PATH . 'includes/settings-page.php';
 
 add_action('admin_enqueue_scripts', function($hook) {
-    if (strpos($hook, 'wfs') !== false) {
-        wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css');
-
-        wp_enqueue_script(
-            'tiptip',
-            WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip.min.js',
-            ['jquery'],
-            WC_VERSION,
-            true
-        );
-
-        wp_enqueue_script(
-            'woocommerce_admin',
-            WC()->plugin_url() . '/assets/js/admin/woocommerce_admin.min.js',
-            ['jquery', 'tiptip'],
-            WC_VERSION,
-            true
-        );
+    // 只在我們自己的外掛頁面載入相關資源
+    if (strpos($hook, 'wfs-settings') === false && strpos($hook, 'wfs-weight-control') === false && strpos($hook, 'wfs-discord-notify') === false) {
+        return;
     }
-});
 
-add_action('admin_footer', function () {
-    if (isset($_GET['page']) && strpos($_GET['page'], 'wfs') !== false) {
-        echo "<script>
-            jQuery(function($){
-                // 如果 tipTip 已經被載入，就觸發初始化
-                if ($.fn.tipTip) {
-                    $('.woocommerce-help-tip').tipTip({
-                        attribute: 'data-tip',
-                        fadeIn: 200,
-                        fadeOut: 200,
-                        delay: 200
-                    });
-                } else {
-                    console.warn('tipTip 未被載入');
-                }
-            });
-        </script>";
-    }
+    // 載入 WooCommerce 預設的 admin CSS
+    wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css');
+
+    // 載入 tiptip 函式庫 (這是 WordPress 的標準做法)
+    wp_enqueue_script('jquery-tiptip', WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip.js', array('jquery'), WC_VERSION, true);
+
+    // 載入我們自己的 wfs-admin.js 檔案
+    wp_enqueue_script(
+        'wfs-admin-script', // 給我們的腳本一個獨一無二的名稱
+        WFS_PLUGIN_URL . 'assets/js/wfs-admin.js', // 檔案路徑
+        array('jquery', 'jquery-tiptip'), // **關鍵：** 告訴 WordPress 這個腳本依賴 jQuery 和 tiptip
+        '1.0.1', // 版本號
+        true // true 代表放在頁面底部載入
+    );
 });
