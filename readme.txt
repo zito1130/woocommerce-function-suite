@@ -1,0 +1,66 @@
+=== WooCommerce Function Suite ===
+Contributors: zito
+Donate link: https://example.com/
+Tags: woocommerce, plugin, order management, discord, shipping, checkout
+Requires at least: 5.6
+Tested up to: 6.5.3
+Requires PHP: 7.4
+Stable tag: 1.0.1
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+一個集中管理多項 WooCommerce 自訂功能的整合型插件，支援後台開關模組，未來可彈性擴充功能。
+
+== Description ==
+
+**WooCommerce Function Suite** 是一個讓 WooCommerce 商店管理者可統一控制各項自訂功能的整合型插件，適合使用 WPCode 或自訂 PHP 片段的使用者進一步模組化管理功能。
+
+目前支援以下功能模組（未來可擴充）：
+
+- 重量控制（可設定最大重量與啟用開關）
+- 最小訂購金額（待開發）
+- 運費控制（待開發）
+- 結帳優化功能（待開發）
+- Discord 通知（可設定 Webhook 與啟用開關）
+- 後台訂單欄位新增（待開發）
+- 拋單功能（將整合 PhpSpreadsheet）
+
+== Installation ==
+
+1. 將插件資料夾上傳至 `/wp-content/plugins/woocommerce-function-suite/`
+2. 或在 WordPress 後台 → 插件 → 安裝 → 上傳 `.zip` 檔安裝
+3. 啟用插件
+4. 進入「Woo功能整合」後台選單設定各項功能開關
+
+== Screenshots ==
+
+1. 主設定頁可控制各模組開關
+2. 子頁：重量控制設定
+3. 子頁：Discord 通知設定
+
+== Frequently Asked Questions ==
+
+= 啟用後功能沒反應？ =
+請確認是否在各子頁啟用了對應功能模組。
+
+= 是否支援多語系？ =
+目前暫無語言檔，後續將提供 `.pot` 檔以利翻譯。
+
+== Changelog ==
+
+= 1.0.1 =
+* 修正後台設定內容
+* 新增提示圖標
+
+= 1.0.0 =
+* 建立插件架構
+* 加入主設定頁與兩個子功能模組設定頁（重量控制、Discord通知）
+
+== Upgrade Notice ==
+
+= 1.0.1 =
+開發版本，建議先安裝測試環境使用。
+
+== License ==
+
+GPLv2 or later - Free to use, modify and distribute.
