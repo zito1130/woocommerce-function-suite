@@ -15,23 +15,29 @@ define('WFS_PLUGIN_URL', plugin_dir_url(__FILE__));
 require_once WFS_PLUGIN_PATH . 'includes/settings-page.php';
 
 add_action('admin_enqueue_scripts', function($hook) {
-    // 只在我們自己的外掛頁面載入相關資源
-    if (strpos($hook, 'wfs-settings') === false && strpos($hook, 'wfs-weight-control') === false && strpos($hook, 'wfs-discord-notify') === false) {
+    // 一個更有效率的寫法，檢查所有你的外掛頁面
+    if (strpos($hook, 'wfs-') === false) {
         return;
     }
 
-    // 載入 WooCommerce 預設的 admin CSS
+    // 載入 WooCommerce 的後台 CSS
     wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css');
 
-    // 載入 tiptip 函式庫 (這是 WordPress 的標準做法)
-    wp_enqueue_script('jquery-tiptip', WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip.js', array('jquery'), WC_VERSION, true);
-
-    // 載入我們自己的 wfs-admin.js 檔案
+    // 載入 tiptip 腳本
     wp_enqueue_script(
-        'wfs-admin-script', // 給我們的腳本一個獨一無二的名稱
-        WFS_PLUGIN_URL . 'assets/js/wfs-admin.js', // 檔案路徑
-        array('jquery', 'jquery-tiptip'), // **關鍵：** 告訴 WordPress 這個腳本依賴 jQuery 和 tiptip
-        '1.0.1', // 版本號
-        true // true 代表放在頁面底部載入
+        'jquery-tiptip',
+        WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip.js',
+        array('jquery', 'dompurify'), // <-- 修正就在這裡！我們新增了 'dompurify'
+        WC_VERSION,
+        true
+    );
+
+    // 載入你自己寫的後台腳本
+    wp_enqueue_script(
+        'wfs-admin-script',
+        WFS_PLUGIN_URL . 'assets/js/wfs-admin.js',
+        array('jquery', 'jquery-tiptip'), // 你的腳本正確地依賴 tipTip
+        '1.0.1',
+        true
     );
 });
