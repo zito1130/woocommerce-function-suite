@@ -31,12 +31,11 @@ add_action('admin_enqueue_scripts', function($hook) {
         true
     );
 
-    // 載入我們自己的後台 JS
     wp_enqueue_script(
         'wfs-admin-script',
         WFS_PLUGIN_URL . 'assets/js/wfs-admin.js',
         array('jquery', 'jquery-tiptip'),
-        '1.1.0', // 同步版本號
+        '1.1.0',
         true
     );
 });
