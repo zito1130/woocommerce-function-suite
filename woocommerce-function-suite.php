@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Function Suite
  * Description: 整合 WooCommerce 各項功能模組的後台控制面板
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: zito
  */
 
@@ -14,30 +14,53 @@ define('WFS_PLUGIN_URL', plugin_dir_url(__FILE__));
 // 載入後台設定頁
 require_once WFS_PLUGIN_PATH . 'includes/settings-page.php';
 
+// 載入後台專用的 CSS 與 JS
 add_action('admin_enqueue_scripts', function($hook) {
-    // 一個更有效率的寫法，檢查所有你的外掛頁面
     if (strpos($hook, 'wfs-') === false) {
         return;
     }
 
-    // 載入 WooCommerce 的後台 CSS
     wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css');
 
-    // 載入 tiptip 腳本
+    // 載入 tiptip 腳本 (並宣告 dompurify 依賴)
     wp_enqueue_script(
         'jquery-tiptip',
         WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip.js',
-        array('jquery', 'dompurify'), // <-- 修正就在這裡！我們新增了 'dompurify'
+        array('jquery', 'dompurify'),
         WC_VERSION,
         true
     );
 
-    // 載入你自己寫的後台腳本
+    // 載入我們自己的後台 JS
     wp_enqueue_script(
         'wfs-admin-script',
         WFS_PLUGIN_URL . 'assets/js/wfs-admin.js',
-        array('jquery', 'jquery-tiptip'), // 你的腳本正確地依賴 tipTip
-        '1.0.1',
+        array('jquery', 'jquery-tiptip'),
+        '1.1.0', // 同步版本號
         true
     );
 });
+
+/**
+ * 步驟一：僅載入檔案
+ * 在 'plugins_loaded' 這個較早的時間點，我們只把 Class 檔案載入進來備用。
+ */
+function wfs_include_active_modules() {
+    if (get_option('wfs_enable_shipping_control') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/shipping-control/class-shipping-control.php';
+    }
+}
+add_action('plugins_loaded', 'wfs_include_active_modules');
+
+
+/**
+ * 步驟二：初始化 Class
+ * 在 'init' 這個比較晚、比較安全的時間點，我們才去 new Class，
+ * 這可以確保 Class 內部的 add_filter 能成功掛載到 WooCommerce 上。
+ */
+function wfs_initialize_active_modules() {
+    if (get_option('wfs_enable_shipping_control') === 'yes' && class_exists('WFS_Shipping_Control')) {
+        new WFS_Shipping_Control();
+    }
+}
+add_action('init', 'wfs_initialize_active_modules');
