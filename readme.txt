@@ -5,7 +5,7 @@ Tags: woocommerce, plugin, order management, discord, shipping, checkout
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.1.0 =
+* 新增：運費控制模組，可排除特價與精選商品計算免運門檻。
+* 修正：修正後台提示框 (Tooltip) 因缺少 DOMPurify 依賴而無法顯示的問題。
+
 = 1.0.1 =
 * 修正後台設定內容
 * 新增提示圖標
@@ -58,7 +62,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.0.1 =
+= 1.0.2.1 =
 開發版本，建議先安裝測試環境使用。
 
 == License ==

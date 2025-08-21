@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Function Suite
  * Description: 整合 WooCommerce 各項功能模組的後台控制面板
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: zito
  */
 
@@ -38,3 +38,10 @@ add_action('admin_enqueue_scripts', function($hook) {
         true
     );
 });
+
+function wfs_load_active_modules() {
+    if (get_option('wfs_enable_shipping_control') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/shipping-control/class-shipping-control.php';
+        new WFS_Shipping_Control();
+    }
+}
