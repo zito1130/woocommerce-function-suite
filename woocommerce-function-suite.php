@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Function Suite
  * Description: 整合 WooCommerce 各項功能模組的後台控制面板
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: zito
  */
 
