@@ -5,7 +5,7 @@ Tags: woocommerce, plugin, order management, discord, shipping, checkout
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 目前暫無語言檔，後續將提供 `.pot` 檔以利翻譯。
 
 == Changelog ==
+
+= 1.2.0 =
+* 新增：後台訂單欄位新增模組，可顯示顧客備註、商家備註、重覆 IP 訂單與 LINE 名稱。
 
 = 1.1.0 =
 * 新增：運費控制模組，可排除特價與精選商品計算免運門檻。
