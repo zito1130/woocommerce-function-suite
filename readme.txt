@@ -48,6 +48,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.3.1 =
+* 修正：修正部分說明文字。
+
 = 1.3.0 =
 * 新增：可透過 Discord Webhook 來接收網站通知（新訂單、商品低庫存）。
 
@@ -65,11 +68,6 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 = 1.0.0 =
 * 建立插件架構
 * 加入主設定頁與兩個子功能模組設定頁（重量控制、Discord通知）
-
-== Upgrade Notice ==
-
-= 1.3.1 =
-若出現錯誤請立即關閉此插件。
 
 == License ==
 
