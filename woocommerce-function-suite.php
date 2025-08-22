@@ -38,6 +38,13 @@ add_action('admin_enqueue_scripts', function($hook) {
         '1.2.0',
         true
     );
+
+    // 在 Discord 通知設定頁載入
+    if (strpos($hook, 'wfs-discord-notify') !== false) {
+        // 載入 Select2 腳本，這是 WooCommerce 可搜尋選單的核心
+        wp_enqueue_script('wc-enhanced-select');
+        wp_enqueue_style('wc-enhanced-select');
+    }
 });
 
 /**
