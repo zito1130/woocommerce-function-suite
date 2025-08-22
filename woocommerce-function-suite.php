@@ -48,6 +48,10 @@ function wfs_include_active_modules() {
     if (get_option('wfs_enable_shipping_control') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/shipping-control/class-shipping-control.php';
     }
+
+    if (get_option('wfs_enable_admin_fields') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/admin-fields/class-admin-fields.php';
+    }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
 
@@ -60,6 +64,10 @@ add_action('plugins_loaded', 'wfs_include_active_modules');
 function wfs_initialize_active_modules() {
     if (get_option('wfs_enable_shipping_control') === 'yes' && class_exists('WFS_Shipping_Control')) {
         new WFS_Shipping_Control();
+    }
+
+    if (get_option('wfs_enable_admin_fields') === 'yes' && class_exists('WFS_Admin_Fields')) {
+        new WFS_Admin_Fields();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');
