@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
  * Class WFS_Admin_Fields
  *
  * 在 WooCommerce 訂單列表頁新增自訂欄位。
- * 包含：顧客備註/商家備註、重覆 IP 訂單。
+ * 包含：顧客備註/商家備註、重覆 IP 訂單、LINE 名稱。
  */
 class WFS_Admin_Fields {
 
@@ -41,6 +41,7 @@ class WFS_Admin_Fields {
             if ('order_date' === $key) {
                 $new_columns['order_notes'] = '備註';
                 $new_columns['order_ip'] = '重覆 IP 訂單';
+                $new_columns['billing_line_id'] = 'LINE 名稱';
             }
         }
         return $new_columns;
@@ -60,22 +61,23 @@ class WFS_Admin_Fields {
 
         // 使用 switch 結構來處理不同的欄位內容
         switch ($column) {
+            case 'billing_line_id':
+                // 從訂單的 meta data 中獲取 LINE 名稱並顯示
+                $billing_line_id = $order->get_meta('billing_line_id');
+                echo esc_html($billing_line_id);
+                break;
+
             case 'order_ip':
                 $ip_address = $order->get_customer_ip_address();
                 if ($ip_address) {
-                    // 注意：'duplicate_order_ids' 是一個非 WooCommerce 內建的 meta key，
-                    // 你需要有其他的程式碼來生成和儲存這個 meta data，此處僅負責顯示。
                     $duplicate_order_ids = $order->get_meta('duplicate_order_ids');
-                    
                     $color = $this->generate_color_from_ip($ip_address);
                     $compressed_ip = $this->compress_ip($ip_address);
 
-                    // 如果有重覆訂單 ID，則顯示 ID
                     if (!empty($duplicate_order_ids)) {
                         $order_ids = implode(', ', array_map('esc_html', explode(',', $duplicate_order_ids)));
                         echo '<span style="color: ' . esc_attr($color) . ';">IP: ' . $order_ids . ' (' . esc_html($compressed_ip) . ')</span>';
                     } else {
-                        // 如果沒有，只顯示 IP 短代碼
                         echo '<span style="color: ' . esc_attr($color) . ';">(' . esc_html($compressed_ip) . ')</span>';
                     }
                 } else {
@@ -84,12 +86,10 @@ class WFS_Admin_Fields {
                 break;
                 
             case 'order_notes':
-                // 顯示顧客備註圖示
                 if ($customer_note = $order->get_customer_note()) {
                     echo '<span class="note-on customer tips" data-tip="' . wc_sanitize_tooltip($customer_note) . '">' . __('Yes', 'woocommerce') . '</span>';
                 }
 
-                // 顯示商家備註圖示
                 $order_notes = wc_get_order_notes(['order_id' => $order->get_id()]);
                 if (!empty($order_notes)) {
                     $latest_note = current($order_notes);
@@ -119,7 +119,7 @@ class WFS_Admin_Fields {
      * 輔助函式：壓縮 IP 位址為短代碼。
      */
     private function compress_ip($ip_address) {
-        return substr(md5($ip_address), -8); // 使用 MD5 雜湊的後八位作為壓縮代碼
+        return substr(md5($ip_address), -8);
     }
 
     /**
@@ -127,6 +127,6 @@ class WFS_Admin_Fields {
      */
     private function generate_color_from_ip($ip_address) {
         $hash = md5($ip_address);
-        return '#' . substr($hash, 0, 6); // 使用 MD5 雜湊的前六位作為顏色
+        return '#' . substr($hash, 0, 6);
     }
 }
