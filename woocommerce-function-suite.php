@@ -52,6 +52,10 @@ function wfs_include_active_modules() {
     if (get_option('wfs_enable_admin_fields') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/admin-fields/class-admin-fields.php';
     }
+
+    if (get_option('wfs_enable_discord_notify') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/discord-notify/class-discord-notify.php';
+    }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
 
@@ -68,6 +72,10 @@ function wfs_initialize_active_modules() {
 
     if (get_option('wfs_enable_admin_fields') === 'yes' && class_exists('WFS_Admin_Fields')) {
         new WFS_Admin_Fields();
+    }
+
+    if (get_option('wfs_enable_discord_notify') === 'yes' && class_exists('WFS_Discord_Notify')) {
+        new WFS_Discord_Notify();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');
