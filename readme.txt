@@ -5,7 +5,7 @@ Tags: woocommerce, plugin, order management, discord, shipping, checkout
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.3.0 =
+* 新增：可透過 Discord Webhook 來接收網站通知（新訂單、商品低庫存）。
+
 = 1.2.0 =
 * 新增：後台訂單欄位新增模組，可顯示顧客備註、商家備註、重覆 IP 訂單與 LINE 名稱。
 
@@ -65,8 +68,8 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
-= 1.0.2.1 =
-開發版本，建議先安裝測試環境使用。
+= 1.3.1 =
+若出現錯誤請立即關閉此插件。
 
 == License ==
 

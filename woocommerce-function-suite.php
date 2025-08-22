@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Function Suite
  * Description: 整合 WooCommerce 各項功能模組的後台控制面板
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: zito
  */
 
@@ -35,7 +35,7 @@ add_action('admin_enqueue_scripts', function($hook) {
         'wfs-admin-script',
         WFS_PLUGIN_URL . 'assets/js/wfs-admin.js',
         array('jquery', 'jquery-tiptip'),
-        '1.2.0',
+        '1.3.0',
         true
     );
 
