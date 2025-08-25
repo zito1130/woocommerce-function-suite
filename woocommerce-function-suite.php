@@ -63,6 +63,10 @@ function wfs_include_active_modules() {
     if (get_option('wfs_enable_discord_notify') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/discord-notify/class-discord-notify.php';
     }
+
+    if (get_option('wfs_enable_weight_control') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/weight-control/class-weight-control.php';
+    }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
 
@@ -83,6 +87,10 @@ function wfs_initialize_active_modules() {
 
     if (get_option('wfs_enable_discord_notify') === 'yes' && class_exists('WFS_Discord_Notify')) {
         new WFS_Discord_Notify();
+    }
+
+    if (get_option('wfs_enable_weight_control') === 'yes' && class_exists('WFS_Weight_Control')) {
+        new WFS_Weight_Control();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');

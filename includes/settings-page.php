@@ -40,7 +40,7 @@ add_action('admin_init', function() {
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
-    register_setting('wfs_weight_group', 'wfs_weight_limit');
+    register_setting('wfs_weight_group', 'wfs_shipping_weight_limits', ['type' => 'array', 'default' => []]);
 
     // Discord 通知子頁
     register_setting('wfs_discord_group', 'wfs_enable_discord_notify');
@@ -79,32 +79,86 @@ function wfs_render_main_page() {
     <?php
 }
 
-// 重量控制子頁面渲染函式 (*** 已恢復完整程式碼 ***)
+// 重量控制子頁面渲染函式 (*** 已更新為更緊湊的排版 ***)
 function wfs_render_weight_control_page() {
     ?>
     <div class="wrap">
         <h1>重量控制設定</h1>
         <form method="post" action="options.php">
             <?php settings_fields('wfs_weight_group'); ?>
+
             <table class="form-table">
-                <tr valign="top">
-                    <th scope="row">啟用此功能</th>
-                    <td>
-                        <input type="checkbox" name="wfs_enable_weight_control" value="yes" <?php checked(get_option('wfs_enable_weight_control'), 'yes'); ?>>
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row">最大重量限制 (kg)</th>
-                    <td>
-                        <input type="number" name="wfs_weight_limit" value="<?php echo esc_attr(get_option('wfs_weight_limit', 30)); ?>" step="0.1">
-                    </td>
-                </tr>
+                <tbody>
+                    <tr valign="top">
+                        <th scope="row" class="titledesc">
+                            <label for="wfs_enable_weight_control">啟用重量限制</label>
+                            <?php echo wc_help_tip('勾選以啟用全站的運送重量限制功能。'); ?>
+                        </th>
+                        <td class="forminp forminp-checkbox">
+                            <fieldset>
+                                <input name="wfs_enable_weight_control" id="wfs_enable_weight_control" type="checkbox" value="yes" <?php checked(get_option('wfs_enable_weight_control'), 'yes'); ?>>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="title">各運送方式重量限制</h2>
+            <p class="description">為您的每個運送方式設定最大可接受的重量(kg)。留空表示該運送方式不受重量限制。</p>
+
+            <table class="form-table">
+                <tbody>
+                    <?php
+                    $saved_limits = get_option('wfs_shipping_weight_limits', []);
+                    $all_zone_data = WC_Shipping_Zones::get_zones();
+                    $all_zone_data[] = array('id' => 0); 
+
+                    foreach ($all_zone_data as $zone_data) {
+                        $zone = WC_Shipping_Zones::get_zone($zone_data['id']);
+                        if (!$zone || empty($zone->get_shipping_methods())) continue;
+
+                        // 顯示運送區域的標題
+                        ?>
+                        <tr valign="top">
+                            <td colspan="2" style="padding: 15px 0; font-size: 1.2em;">
+                                <strong><?php echo esc_html($zone->get_zone_name()); ?></strong>
+                            </td>
+                        </tr>
+                        <?php
+                        
+                        foreach ($zone->get_shipping_methods() as $shipping_method) {
+                            $method_id = $shipping_method->get_rate_id();
+                            $current_limit = isset($saved_limits[$method_id]) ? $saved_limits[$method_id] : '';
+                            ?>
+                            <tr valign="top">
+                                <th scope="row" class="titledesc">
+                                    <label for="wfs_shipping_weight_limit_<?php echo esc_attr($method_id); ?>">
+                                        <?php echo esc_html($shipping_method->get_title()); ?>
+                                    </label>
+                                </th>
+                                <td class="forminp forminp-text">
+                                    <input 
+                                        name="wfs_shipping_weight_limits[<?php echo esc_attr($method_id); ?>]" 
+                                        id="wfs_shipping_weight_limit_<?php echo esc_attr($method_id); ?>" 
+                                        type="number" 
+                                        step="0.01" 
+                                        style="width: 100px;"
+                                        value="<?php echo esc_attr($current_limit); ?>"
+                                        placeholder="無限制"> kg
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                </tbody>
             </table>
             <?php submit_button(); ?>
         </form>
     </div>
     <?php
 }
+
 
 // Discord 通知子頁面渲染函式 (這是您已有的、排版正確的版本)
 function wfs_render_discord_page() {
