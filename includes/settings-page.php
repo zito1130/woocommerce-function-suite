@@ -37,6 +37,7 @@ add_action('admin_init', function() {
     // 主設定頁
     register_setting('wfs_settings_group', 'wfs_enable_shipping_control');
     register_setting('wfs_settings_group', 'wfs_enable_admin_fields');
+    register_setting('wfs_settings_group', 'wfs_enable_progress_bar');
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
@@ -72,6 +73,12 @@ function wfs_render_main_page() {
                         <input type="checkbox" name="wfs_enable_admin_fields" value="yes" <?php checked(get_option('wfs_enable_admin_fields'), 'yes'); ?>>
                     </td>
                 </tr>
+                <tr valign="top">
+                    <th scope="row">運送重量進度條</th>
+                    <td>
+                        <?php echo wc_help_tip('勾選啟用後，在商品、購物車頁面中，將顯示用戶目前重量進度條。'); ?>
+                        <input type="checkbox" name="wfs_enable_progress_bar" value="yes" <?php checked(get_option('wfs_enable_progress_bar'), 'yes'); ?>>
+                    </td>
             </table>
             <?php submit_button(); ?>
         </form>

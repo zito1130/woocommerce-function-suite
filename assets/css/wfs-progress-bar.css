@@ -1,0 +1,99 @@
+/* --- WFS Shipping Weight Progress Bar Styles --- */
+
+.wfs-progress-bar-wrapper {
+    margin-bottom: 2em;
+    padding: 1em;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+}
+
+#wfs-shipping-progress-bar-container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.wfs-progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.wfs-progress-bar-track {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    background-color: #e9e9e9;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.wfs-progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to bottom,  #5cb85c 0%,#4CAF50 100%);
+    box-shadow: inset 0 -1px 1px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+    position: relative;
+}
+
+/* --- 圖示相關樣式 --- */
+
+.wfs-tier-icons-container {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    position: relative;
+}
+
+.wfs-tier-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85em;
+    color: #444;
+    cursor: help;
+}
+
+.wfs-tier-icon svg,
+.wfs-tier-icon > span:not(.wfs-tier-tooltip) {
+    transition: opacity 0.3s ease-in-out; /* 只有 SVG 和文字有透明度動畫 */
+}
+
+.wfs-tier-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* *** 關鍵修改點：只讓 SVG 和文字變淡，而不是整個容器 *** */
+.wfs-tier-icon.is-overweight > svg,
+.wfs-tier-icon.is-overweight > span:not(.wfs-tier-tooltip) {
+    opacity: 0.4;
+}
+
+.wfs-tier-icon .wfs-tier-tooltip {
+    visibility: hidden;
+    min-width: 140px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.wfs-tier-icon:hover .wfs-tier-tooltip {
+    visibility: visible;
+    opacity: 1; /* 這個 opacity 現在是相對於 1，所以會完全不透明 */
+}
