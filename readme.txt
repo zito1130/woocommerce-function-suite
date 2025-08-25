@@ -5,7 +5,7 @@ Tags: woocommerce, plugin, order management, discord, shipping, checkout
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 - 重量控制（可設定最大重量與啟用開關）
 - 最小訂購金額（待開發）
-- 運費控制（待開發）
+- 運費控制
 - 結帳優化功能（待開發）
 - Discord 通知（可設定 Webhook 與啟用開關）
 - 後台訂單欄位新增（待開發）
@@ -47,6 +47,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 目前暫無語言檔，後續將提供 `.pot` 檔以利翻譯。
 
 == Changelog ==
+
+= 1.4.0 =
+* 優化：重量控制模組新增「加入購物車」與「更新購物車」的前端驗證，提升使用者體驗。
+* 優化：重量控制模組後台設定頁面排版與 UX。
 
 = 1.3.1 =
 * 修正：修正部分說明文字。
