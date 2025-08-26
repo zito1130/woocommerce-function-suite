@@ -5,7 +5,7 @@ Tags: woocommerce, plugin, order management, discord, shipping, checkout
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 目前暫無語言檔，後續將提供 `.pot` 檔以利翻譯。
 
 == Changelog ==
+
+= 1.5.5 =
+* 修正：修復未啟用的運送方式依然會出現在進度條下方的錯誤。
 
 = 1.5.4 =
 * 修正：修正部分說明文字。
