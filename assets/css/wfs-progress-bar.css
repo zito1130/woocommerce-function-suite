@@ -33,12 +33,18 @@
 .wfs-progress-bar-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(to bottom,  #5cb85c 0%,#4CAF50 100%);
     box-shadow: inset 0 -1px 1px rgba(0,0,0,0.15);
     border-radius: 10px;
-    transition: width 0.5s ease-in-out;
+    /* *** 關鍵修改點：動畫現在同時作用於寬度和背景位置 *** */
+    transition: width 0.5s ease-out, background-position 0.5s ease-out;
     position: relative;
+    
+    /* *** 關鍵修改點：定義一個超長的漸層背景 *** */
+    background-size: 300% 100%; /* 將背景寬度設為 300% */
+    background-image: linear-gradient(to right, #5cb85c 0%, #f0ad4e 50%, #d9534f 100%);
+    background-position: 0% 50%; /* 初始位置在最左邊 (綠色) */
 }
+
 
 /* --- 圖示相關樣式 --- */
 
@@ -61,7 +67,7 @@
 
 .wfs-tier-icon svg,
 .wfs-tier-icon > span:not(.wfs-tier-tooltip) {
-    transition: opacity 0.3s ease-in-out; /* 只有 SVG 和文字有透明度動畫 */
+    transition: opacity 0.3s ease-in-out;
 }
 
 .wfs-tier-icon svg {
@@ -69,7 +75,6 @@
     height: 24px;
 }
 
-/* *** 關鍵修改點：只讓 SVG 和文字變淡，而不是整個容器 *** */
 .wfs-tier-icon.is-overweight > svg,
 .wfs-tier-icon.is-overweight > span:not(.wfs-tier-tooltip) {
     opacity: 0.4;
@@ -95,5 +100,5 @@
 
 .wfs-tier-icon:hover .wfs-tier-tooltip {
     visibility: visible;
-    opacity: 1; /* 這個 opacity 現在是相對於 1，所以會完全不透明 */
+    opacity: 1;
 }

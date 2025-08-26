@@ -15,26 +15,24 @@ class WFS_Progress_Bar {
         // 掛載我們的 CSS 和 JS 檔案
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
 
-        // 掛載 HTML 容器
+        // 使用多個、針對各頁面最可靠的 hook
         add_action('woocommerce_before_cart_totals', [$this, 'render_progress_bar_container']);
         add_action('woocommerce_before_add_to_cart_button', [$this, 'render_progress_bar_container']);
         add_action('woocommerce_before_shop_loop', [$this, 'render_progress_bar_container']);
 
-        // *** 新增：註冊 AJAX action ***
+        // 註冊 AJAX action
         add_action('wp_ajax_wfs_get_cart_weight_for_progress', [$this, 'ajax_get_cart_weight']);
         add_action('wp_ajax_nopriv_wfs_get_cart_weight_for_progress', [$this, 'ajax_get_cart_weight']);
     }
 
     /**
-     * *** 新增：AJAX 處理函式 ***
-     * 當前端 JS 請求時，回傳當前最新的購物車總重量。
+     * AJAX 處理函式
      */
     public function ajax_get_cart_weight() {
-        // 安全性檢查
         check_ajax_referer('wfs-progress-nonce', 'nonce');
-        
         wp_send_json_success([
-            'weight' => WC()->cart->get_cart_contents_weight()
+            'weight' => WC()->cart->get_cart_contents_weight(),
+            'shipping_class' => $this->get_cart_shipping_class_name(), // 同時回傳最新的運送類別
         ]);
     }
 
@@ -45,7 +43,6 @@ class WFS_Progress_Bar {
         if (!is_product() && !is_cart() && !is_shop()) {
             return;
         }
-
         wp_enqueue_style('wfs-progress-bar-style', WFS_PLUGIN_URL . 'assets/css/wfs-progress-bar.css', [], '1.5.1');
         wp_enqueue_script('wfs-progress-bar-script', WFS_PLUGIN_URL . 'assets/js/wfs-progress-bar.js', ['jquery'], '1.5.1', true);
         wp_localize_script('wfs-progress-bar-script', 'wfs_progress_params', $this->get_js_params());
@@ -59,7 +56,9 @@ class WFS_Progress_Bar {
         if (empty(array_filter($limits))) {
             return;
         }
+        echo '<div class="wfs-progress-bar-wrapper woocommerce">';
         echo '<div id="wfs-shipping-progress-bar-container"></div>';
+        echo '</div>';
     }
     
     /**
@@ -86,13 +85,36 @@ class WFS_Progress_Bar {
                 $product_weight = (float) $product->get_weight();
             }
         }
+        
         return [
-            // 我們不再傳遞 cart_weight，因為 JS 會自己去要
-            'shipping_methods' => $shipping_methods_data,
-            'i18n'             => ['current_weight' => __('目前總重', 'woocommerce-function-suite')],
-            'product_weight'   => $product_weight,
-            'nonce'            => wp_create_nonce('wfs-progress-nonce'), // *** 新增：傳遞 Nonce 給 JS ***
-            'ajax_url'         => admin_url('admin-ajax.php'),      // *** 新增：傳遞 AJAX URL 給 JS ***
+            'shipping_methods'        => $shipping_methods_data,
+            'i18n'                    => ['current_weight' => __('目前總重', 'woocommerce-function-suite')],
+            'product_weight'          => $product_weight,
+            'cart_shipping_class'     => $this->get_cart_shipping_class_name(),
+            'nonce'                   => wp_create_nonce('wfs-progress-nonce'),
+            'ajax_url'                => admin_url('admin-ajax.php'),
         ];
+    }
+
+    /**
+     * 輔助函式：取得目前購物車的運送類別名稱。
+     */
+    private function get_cart_shipping_class_name() {
+        if (WC()->cart && !WC()->cart->is_empty()) {
+            $cart_contents = WC()->cart->get_cart();
+            $first_cart_item = reset($cart_contents);
+            if ($first_cart_item && isset($first_cart_item['data'])) {
+                $shipping_class_id = $first_cart_item['data']->get_shipping_class_id();
+                if ($shipping_class_id) {
+                    $shipping_class = get_term($shipping_class_id, 'product_shipping_class');
+                    if ($shipping_class && !is_wp_error($shipping_class)) {
+                        return $shipping_class->name;
+                    }
+                } else {
+                    return '常溫'; 
+                }
+            }
+        }
+        return '';
     }
 }
