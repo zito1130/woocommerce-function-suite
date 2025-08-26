@@ -5,7 +5,7 @@ Tags: woocommerce, plugin, order management, discord, shipping, checkout
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,8 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 目前暫無語言檔，後續將提供 `.pot` 檔以利翻譯。
 
 == Changelog ==
+* 優化：在訂單重量進度條上方新增運送類別。
+* 優化：修正進度條顏色。
 
 = 1.5.0 =
 * 優化：在商城目錄、商品頁面、購物車頁面顯示目前訂單重量進度條。
