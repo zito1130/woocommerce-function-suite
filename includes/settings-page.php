@@ -37,10 +37,10 @@ add_action('admin_init', function() {
     // 主設定頁
     register_setting('wfs_settings_group', 'wfs_enable_shipping_control');
     register_setting('wfs_settings_group', 'wfs_enable_admin_fields');
-    register_setting('wfs_settings_group', 'wfs_enable_progress_bar');
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
+    register_setting('wfs_weight_group', 'wfs_enable_progress_bar');
     register_setting('wfs_weight_group', 'wfs_shipping_weight_limits', ['type' => 'array', 'default' => []]);
 
     // Discord 通知子頁
@@ -60,25 +60,27 @@ function wfs_render_main_page() {
             <?php settings_fields('wfs_settings_group'); ?>
             <table class="form-table">
                 <tr valign="top">
-                    <th scope="row">運費控制</th>
-                    <td>
+                    <th scope="row">
+                        <label for="wfs_enable_shipping_control">運費控制</label>
                         <?php echo wc_help_tip('勾選啟用運費控制，只要商品有任何折扣或為精選商品，將不計算在免運費門檻中。'); ?>
-                        <input type="checkbox" name="wfs_enable_shipping_control" value="yes" <?php checked(get_option('wfs_enable_shipping_control'), 'yes'); ?>>
+                    </th>
+                    <td class="forminp forminp-checkbox">
+                        <fieldset>
+                            <input type="checkbox" name="wfs_enable_shipping_control" value="yes" <?php checked(get_option('wfs_enable_shipping_control'), 'yes'); ?>>
+                        </fieldset>
                     </td>
                 </tr>
                 <tr valign="top">
-                    <th scope="row">後台訂單欄位新增</th>
-                    <td>
+                    <th scope="row">
+                        <label for="wfs_enable_admin_fields">後台訂單欄位新增</label>
                         <?php echo wc_help_tip('勾選啟用後，後台將顯示 LINE 名稱、訂單備註、重覆 IP 等自訂欄位。'); ?>
-                        <input type="checkbox" name="wfs_enable_admin_fields" value="yes" <?php checked(get_option('wfs_enable_admin_fields'), 'yes'); ?>>
+                    </th>
+                    <td class="forminp forminp-checkbox">
+                        <fieldset>
+                            <input type="checkbox" name="wfs_enable_admin_fields" value="yes" <?php checked(get_option('wfs_enable_admin_fields'), 'yes'); ?>>
+                        </fieldset>
                     </td>
                 </tr>
-                <tr valign="top">
-                    <th scope="row">運送重量進度條</th>
-                    <td>
-                        <?php echo wc_help_tip('勾選啟用後，在商品、購物車頁面中，將顯示用戶目前重量進度條。'); ?>
-                        <input type="checkbox" name="wfs_enable_progress_bar" value="yes" <?php checked(get_option('wfs_enable_progress_bar'), 'yes'); ?>>
-                    </td>
             </table>
             <?php submit_button(); ?>
         </form>
@@ -104,6 +106,17 @@ function wfs_render_weight_control_page() {
                         <td class="forminp forminp-checkbox">
                             <fieldset>
                                 <input name="wfs_enable_weight_control" id="wfs_enable_weight_control" type="checkbox" value="yes" <?php checked(get_option('wfs_enable_weight_control'), 'yes'); ?>>
+                            </fieldset>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label for="wfs_enable_progress_bar">運送重量進度條</lable>
+                            <?php echo wc_help_tip('勾選啟用後，在商品、購物車頁面中，將顯示用戶目前重量進度條。'); ?>
+                        </th>
+                        <td class="forminp forminp-checkbox">
+                            <fieldset>
+                                <input type="checkbox" name="wfs_enable_progress_bar" value="yes" <?php checked(get_option('wfs_enable_progress_bar'), 'yes'); ?>>
                             </fieldset>
                         </td>
                     </tr>
