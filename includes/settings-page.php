@@ -37,6 +37,8 @@ add_action('admin_init', function() {
     // 主設定頁
     register_setting('wfs_settings_group', 'wfs_enable_shipping_control');
     register_setting('wfs_settings_group', 'wfs_enable_admin_fields');
+    register_setting('wfs_settings_group', 'wfs_enable_minimum_order');
+    register_setting('wfs_settings_group', 'wfs_minimum_order_amount');
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
@@ -78,6 +80,34 @@ function wfs_render_main_page() {
                     <td class="forminp forminp-checkbox">
                         <fieldset>
                             <input type="checkbox" name="wfs_enable_admin_fields" value="yes" <?php checked(get_option('wfs_enable_admin_fields'), 'yes'); ?>>
+                        </fieldset>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="wfs_minimum_order_amount">最小訂購金額</label>
+                        <?php echo wc_help_tip('啟用後，顧客需達到指定金額才能結帳。'); ?>
+                    </th>
+                    <td class="forminp">
+                        <fieldset>
+                            <input 
+                                name="wfs_enable_minimum_order" 
+                                id="wfs_enable_minimum_order" 
+                                type="checkbox" 
+                                value="yes" 
+                                <?php checked(get_option('wfs_enable_minimum_order'), 'yes'); ?>>
+                            
+                            <label for="wfs_minimum_order_amount" style="margin: 0 5px;">訂單需滿</label>
+                            <input 
+                                name="wfs_minimum_order_amount" 
+                                id="wfs_minimum_order_amount" 
+                                type="number" 
+                                step="1" 
+                                min="0"
+                                value="<?php echo esc_attr(get_option('wfs_minimum_order_amount', '')); ?>" 
+                                class="small-text"
+                                placeholder="金額">
+                            <span>元</span>
                         </fieldset>
                     </td>
                 </tr>

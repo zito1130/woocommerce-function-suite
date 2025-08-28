@@ -60,9 +60,11 @@ function wfs_include_active_modules() {
     if (get_option('wfs_enable_weight_control') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/weight-control/class-weight-control.php';
     }
-    // *** 關鍵修正點：將 'include' 改為 'includes' ***
     if (get_option('wfs_enable_progress_bar') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/progress-bar/class-progress-bar.php';
+    }
+    if (get_option('wfs_enable_minimum_order') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/minimum-order/class-minimum-order.php';
     }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
@@ -84,9 +86,11 @@ function wfs_initialize_active_modules() {
     if (get_option('wfs_enable_weight_control') === 'yes' && class_exists('WFS_Weight_Control')) {
         new WFS_Weight_Control();
     }
-    // *** 關鍵修正點：將 WFS_Progress_bar 改為 WFS_Progress_Bar ***
     if (get_option('wfs_enable_progress_bar') === 'yes' && class_exists('WFS_Progress_Bar')) {
         new WFS_Progress_Bar();
+    }
+    if (get_option('wfs_enable_minimum_order') === 'yes' && class_exists('WFS_Minimum_Order')) {
+        new WFS_Minimum_Order();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');
