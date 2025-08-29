@@ -39,6 +39,8 @@ add_action('admin_init', function() {
     register_setting('wfs_settings_group', 'wfs_enable_admin_fields');
     register_setting('wfs_settings_group', 'wfs_enable_minimum_order');
     register_setting('wfs_settings_group', 'wfs_minimum_order_amount');
+    register_setting('wfs_settings_group', 'wfs_enable_line_notify');
+    register_setting('wfs_settings_group', 'wfs_line_notify_oa_id');
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
@@ -111,6 +113,34 @@ function wfs_render_main_page() {
                         </fieldset>
                     </td>
                 </tr>
+                <tr valign="top">
+                <th scope="row">
+                    <label for="wfs_enable_line_notify">LINE 訂單通知</label>
+                    <?php echo wc_help_tip('啟用後，顧客在訂單完成頁會看到一個彈窗，引導他們將訂單資訊傳送到您的 LINE 官方帳號。'); ?>
+                </th>
+                <td class="forminp">
+                    <fieldset>
+                        <input 
+                            name="wfs_enable_line_notify" 
+                            id="wfs_enable_line_notify" 
+                            type="checkbox" 
+                            value="yes" 
+                            <?php checked(get_option('wfs_enable_line_notify'), 'yes'); ?>>
+                        <label for="wfs_enable_line_notify">啟用 LINE 訂單通知模組</label>
+                    </fieldset>
+                    <fieldset style="margin-top: 10px;">
+                        <label for="wfs_line_notify_oa_id">您的 LINE 官方帳號 ID：</label>
+                        <input 
+                            name="wfs_line_notify_oa_id" 
+                            id="wfs_line_notify_oa_id" 
+                            type="text" 
+                            value="<?php echo esc_attr(get_option('wfs_line_notify_oa_id', '')); ?>" 
+                            class="regular-text"
+                            placeholder="例如：@123abcde">
+                         <p class="description">請輸入包含 "@" 的完整 ID。</p>
+                    </fieldset>
+                </td>
+            </tr>
             </table>
             <?php submit_button(); ?>
         </form>

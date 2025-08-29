@@ -66,6 +66,9 @@ function wfs_include_active_modules() {
     if (get_option('wfs_enable_minimum_order') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/minimum-order/class-minimum-order.php';
     }
+    if (get_option('wfs_enable_line_notify') === 'yes') {
+    require_once WFS_PLUGIN_PATH . 'includes/modules/line-notify/class-line-notify.php';
+    }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
 
@@ -91,6 +94,9 @@ function wfs_initialize_active_modules() {
     }
     if (get_option('wfs_enable_minimum_order') === 'yes' && class_exists('WFS_Minimum_Order')) {
         new WFS_Minimum_Order();
+    }
+    if (get_option('wfs_enable_line_notify') === 'yes' && class_exists('WFS_Line_Notify')) {
+    new WFS_Line_Notify();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');
