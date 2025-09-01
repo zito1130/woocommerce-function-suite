@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Function Suite
  * Description: 整合 WooCommerce 各項功能模組的後台控制面板
- * Version: 1.6.0
+ * Version: 1.7.0
  * Author: zito
  */
 
@@ -34,7 +34,7 @@ add_action('admin_enqueue_scripts', function($hook) {
         'wfs-admin-script',
         WFS_PLUGIN_URL . 'assets/js/wfs-admin.js',
         array('jquery', 'jquery-tiptip'),
-        '1.6.0',
+        '1.7.0',
         true
     );
 
@@ -67,7 +67,7 @@ function wfs_include_active_modules() {
         require_once WFS_PLUGIN_PATH . 'includes/modules/minimum-order/class-minimum-order.php';
     }
     if (get_option('wfs_enable_line_notify') === 'yes') {
-    require_once WFS_PLUGIN_PATH . 'includes/modules/line-notify/class-line-notify.php';
+        require_once WFS_PLUGIN_PATH . 'includes/modules/line-notify/class-line-notify.php';
     }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
@@ -96,7 +96,7 @@ function wfs_initialize_active_modules() {
         new WFS_Minimum_Order();
     }
     if (get_option('wfs_enable_line_notify') === 'yes' && class_exists('WFS_Line_Notify')) {
-    new WFS_Line_Notify();
+        new WFS_Line_Notify();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');
