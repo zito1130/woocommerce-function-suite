@@ -41,6 +41,7 @@ add_action('admin_init', function() {
     register_setting('wfs_settings_group', 'wfs_minimum_order_amount');
     register_setting('wfs_settings_group', 'wfs_enable_line_notify');
     register_setting('wfs_settings_group', 'wfs_line_notify_oa_id');
+    register_setting('wfs_settings_group', 'wfs_enable_checkout_validation');
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
@@ -129,18 +130,27 @@ function wfs_render_main_page() {
                         <label for="wfs_enable_line_notify">啟用 LINE 訂單通知模組</label>
                     </fieldset>
                     <fieldset style="margin-top: 10px;">
-                        <label for="wfs_line_notify_oa_id">您的 LINE 官方帳號 ID：</label>
                         <input 
                             name="wfs_line_notify_oa_id" 
                             id="wfs_line_notify_oa_id" 
                             type="text" 
                             value="<?php echo esc_attr(get_option('wfs_line_notify_oa_id', '')); ?>" 
                             class="regular-text"
-                            placeholder="例如：@123abcde">
-                         <p class="description">請輸入包含 "@" 的完整 ID。</p>
+                            placeholder='請輸入包含 "@" 的完整 ID。'>
                     </fieldset>
                 </td>
             </tr>
+            <tr valign="top">
+                    <th scope="row">
+                        <label for="wfs_enable_checkout_validation">結帳欄位優化</label>
+                        <?php echo wc_help_tip('啟用後，將強制顯示收件人欄位，並對姓名與手機號碼進行即時格式驗證。'); ?>
+                    </th>
+                    <td class="forminp forminp-checkbox">
+                        <fieldset>
+                            <input type="checkbox" name="wfs_enable_checkout_validation" value="yes" <?php checked(get_option('wfs_enable_checkout_validation'), 'yes'); ?>>
+                        </fieldset>
+                    </td>
+                </tr>
             </table>
             <?php submit_button(); ?>
         </form>

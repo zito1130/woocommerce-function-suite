@@ -69,6 +69,9 @@ function wfs_include_active_modules() {
     if (get_option('wfs_enable_line_notify') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/line-notify/class-line-notify.php';
     }
+    if (get_option('wfs_enable_checkout_validation') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/checkout-validation/class-checkout-validation.php';
+    }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
 
@@ -97,6 +100,9 @@ function wfs_initialize_active_modules() {
     }
     if (get_option('wfs_enable_line_notify') === 'yes' && class_exists('WFS_Line_Notify')) {
         new WFS_Line_Notify();
+    }
+    if (get_option('wfs_enable_checkout_validation') === 'yes' && class_exists('WFS_Checkout_Validation')) {
+        new WFS_Checkout_Validation();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');
