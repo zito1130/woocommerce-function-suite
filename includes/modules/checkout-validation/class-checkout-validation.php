@@ -59,7 +59,7 @@ class WFS_Checkout_Validation {
                 'wfs-checkout-validation-script',
                 WFS_PLUGIN_URL . 'assets/js/wfs-checkout-validation.js',
                 ['jquery', 'wc-checkout'],
-                '1.8.0', // 建議更新版本號
+                '1.8.1', // 建議更新版本號
                 true
             );
         }
