@@ -42,6 +42,7 @@ add_action('admin_init', function() {
     register_setting('wfs_settings_group', 'wfs_enable_line_notify');
     register_setting('wfs_settings_group', 'wfs_line_notify_oa_id');
     register_setting('wfs_settings_group', 'wfs_enable_checkout_validation');
+    register_setting('wfs_settings_group', 'wfs_enable_merge_orders'); 
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
@@ -115,32 +116,32 @@ function wfs_render_main_page() {
                     </td>
                 </tr>
                 <tr valign="top">
-                <th scope="row">
-                    <label for="wfs_enable_line_notify">LINE 訂單通知</label>
-                    <?php echo wc_help_tip('啟用後，顧客在訂單完成頁會看到一個彈窗，引導他們將訂單資訊傳送到您的 LINE 官方帳號。'); ?>
-                </th>
-                <td class="forminp">
-                    <fieldset>
-                        <input 
-                            name="wfs_enable_line_notify" 
-                            id="wfs_enable_line_notify" 
-                            type="checkbox" 
-                            value="yes" 
-                            <?php checked(get_option('wfs_enable_line_notify'), 'yes'); ?>>
-                        <label for="wfs_enable_line_notify">啟用 LINE 訂單通知模組</label>
-                    </fieldset>
-                    <fieldset style="margin-top: 10px;">
-                        <input 
-                            name="wfs_line_notify_oa_id" 
-                            id="wfs_line_notify_oa_id" 
-                            type="text" 
-                            value="<?php echo esc_attr(get_option('wfs_line_notify_oa_id', '')); ?>" 
-                            class="regular-text"
-                            placeholder='請輸入包含 "@" 的完整 ID。'>
-                    </fieldset>
-                </td>
-            </tr>
-            <tr valign="top">
+                    <th scope="row">
+                        <label for="wfs_enable_line_notify">LINE 訂單通知</label>
+                        <?php echo wc_help_tip('啟用後，顧客在訂單完成頁會看到一個彈窗，引導他們將訂單資訊傳送到您的 LINE 官方帳號。'); ?>
+                    </th>
+                    <td class="forminp">
+                        <fieldset>
+                            <input 
+                                name="wfs_enable_line_notify" 
+                                id="wfs_enable_line_notify" 
+                                type="checkbox" 
+                                value="yes" 
+                                <?php checked(get_option('wfs_enable_line_notify'), 'yes'); ?>>
+                            <label for="wfs_enable_line_notify">啟用 LINE 訂單通知模組</label>
+                        </fieldset>
+                        <fieldset style="margin-top: 10px;">
+                            <input 
+                                name="wfs_line_notify_oa_id" 
+                                id="wfs_line_notify_oa_id" 
+                                type="text" 
+                                value="<?php echo esc_attr(get_option('wfs_line_notify_oa_id', '')); ?>" 
+                                class="regular-text"
+                                placeholder='請輸入包含 "@" 的完整 ID。'>
+                        </fieldset>
+                    </td>
+                </tr>
+                <tr valign="top">
                     <th scope="row">
                         <label for="wfs_enable_checkout_validation">結帳欄位優化</label>
                         <?php echo wc_help_tip('啟用後，將強制顯示收件人欄位，並對姓名與手機號碼進行即時格式驗證。'); ?>
@@ -148,6 +149,17 @@ function wfs_render_main_page() {
                     <td class="forminp forminp-checkbox">
                         <fieldset>
                             <input type="checkbox" name="wfs_enable_checkout_validation" value="yes" <?php checked(get_option('wfs_enable_checkout_validation'), 'yes'); ?>>
+                        </fieldset>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="wfs_enable_merge_orders">合併訂單功能</label>
+                        <?php echo wc_help_tip('啟用後，可在訂單列表頁透過批次操作來合併多筆訂單。'); ?>
+                    </th>
+                    <td class="forminp forminp-checkbox">
+                        <fieldset>
+                            <input type="checkbox" name="wfs_enable_merge_orders" value="yes" <?php checked(get_option('wfs_enable_merge_orders'), 'yes'); ?>>
                         </fieldset>
                     </td>
                 </tr>
