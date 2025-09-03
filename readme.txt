@@ -5,7 +5,7 @@ Tags: woocommerce, plugin, order management, discord, shipping, checkout
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,12 +18,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 目前支援以下功能模組（未來可擴充）：
 
 - 重量控制（可設定最大重量與啟用開關）
-- 最小訂購金額（待開發）
+- 商品目錄、商品頁面、購物車顯示重量進度條
+- 最小訂購金額
 - 運費控制
-- 結帳優化功能（待開發）
+- 結帳優化功能
 - Discord 通知（可設定 Webhook 與啟用開關）
-- 後台訂單欄位新增（待開發）
-- 拋單功能（將整合 PhpSpreadsheet）
+- 後台訂單欄位新增
+- 合併訂單功能
+- 拋單功能
+- 傳送訂購資訊至官方 LINE
 
 == Installation ==
 
@@ -47,6 +50,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 目前暫無語言檔，後續將提供 `.pot` 檔以利翻譯。
 
 == Changelog ==
+
+= 1.10.0 =
+* 新增：整合訂單匯出功能（7-11、全家、新竹物流）。
 
 = 1.9.0 =
 * 新增：後台訂單合併功能。
