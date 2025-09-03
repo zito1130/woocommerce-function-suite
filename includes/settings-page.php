@@ -43,6 +43,7 @@ add_action('admin_init', function() {
     register_setting('wfs_settings_group', 'wfs_line_notify_oa_id');
     register_setting('wfs_settings_group', 'wfs_enable_checkout_validation');
     register_setting('wfs_settings_group', 'wfs_enable_merge_orders'); 
+    register_setting('wfs_settings_group', 'wfs_enable_order_export'); 
 
     // 重量控制子頁
     register_setting('wfs_weight_group', 'wfs_enable_weight_control');
@@ -160,6 +161,17 @@ function wfs_render_main_page() {
                     <td class="forminp forminp-checkbox">
                         <fieldset>
                             <input type="checkbox" name="wfs_enable_merge_orders" value="yes" <?php checked(get_option('wfs_enable_merge_orders'), 'yes'); ?>>
+                        </fieldset>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="wfs_enable_order_export">訂單匯出 Excel</label>
+                        <?php echo wc_help_tip('啟用後，可在訂單列表頁透過批次操作，將訂單匯出為 7-11、全家、新竹貨運等格式的 Excel 檔案。'); ?>
+                    </th>
+                    <td class="forminp forminp-checkbox">
+                        <fieldset>
+                            <input type="checkbox" name="wfs_enable_order_export" value="yes" <?php checked(get_option('wfs_enable_order_export'), 'yes'); ?>>
                         </fieldset>
                     </td>
                 </tr>

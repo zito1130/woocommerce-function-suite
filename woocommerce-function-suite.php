@@ -11,6 +11,10 @@ if (!defined('ABSPATH')) exit;
 define('WFS_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('WFS_PLUGIN_URL', plugin_dir_url(__FILE__));
 
+if (file_exists(WFS_PLUGIN_PATH . 'vendor/autoload.php')) {
+    require_once WFS_PLUGIN_PATH . 'vendor/autoload.php';
+}
+
 // 載入後台設定頁
 require_once WFS_PLUGIN_PATH . 'includes/settings-page.php';
 
@@ -75,6 +79,9 @@ function wfs_include_active_modules() {
     if (get_option('wfs_enable_merge_orders') === 'yes') {
         require_once WFS_PLUGIN_PATH . 'includes/modules/merge-orders/class-merge-orders.php';
     }
+    if (get_option('wfs_enable_order_export') === 'yes') {
+        require_once WFS_PLUGIN_PATH . 'includes/modules/order-export/class-order-export.php';
+    }
 }
 add_action('plugins_loaded', 'wfs_include_active_modules');
 
@@ -109,6 +116,9 @@ function wfs_initialize_active_modules() {
     }
     if (get_option('wfs_enable_merge_orders') === 'yes' && class_exists('WFS_Merge_Orders')) {
         new WFS_Merge_Orders();
+    }
+    if (get_option('wfs_enable_order_export') === 'yes' && class_exists('WFS_Order_Export')) {
+        new WFS_Order_Export();
     }
 }
 add_action('init', 'wfs_initialize_active_modules');
