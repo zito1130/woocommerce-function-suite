@@ -39,18 +39,12 @@ class WFS_Order_Export {
         add_action('manage_shop_order_posts_custom_column', [$this, 'render_last_exported_column'], 10, 2);
     }
 
-    /**
-     * 宣告與 HPOS 的兼容性。
-     */
     public function declare_hpos_compatibility() {
         if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
             \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
         }
     }
 
-    /**
-     * 將所有匯出選項加入批次操作選單。
-     */
     public function add_export_bulk_actions($actions) {
         $actions['export_orders_711'] = __('匯出 Excel (7-11)', 'woocommerce-function-suite');
         $actions['export_orders_familymart'] = __('匯出 Excel (全家)', 'woocommerce-function-suite');
@@ -59,53 +53,48 @@ class WFS_Order_Export {
         return $actions;
     }
 
-    /**
-     * 處理所有匯出請求的核心邏輯。
-     */
     public function handle_export_bulk_action($redirect_to, $action, $post_ids) {
         if (strpos($action, 'export_orders_') !== 0) {
             return $redirect_to;
         }
 
         try {
-            $template_file = '';
-            $start_row = 2; // 預設從第二行開始
+            $spreadsheet = null;
+            $sheet = null;
+            $start_row = 1;
 
-            // 根據 action 決定要載入的範本檔案
+            // --- *** 關鍵修正點：根據 action 分開處理檔案的建立方式 *** ---
             switch ($action) {
                 case 'export_orders_711':
-                    $template_file = '711-export-example.xlsm';
-                    $start_row = 7;
-                    break;
                 case 'export_orders_familymart':
-                    $template_file = 'fami-export-example.xls';
-                    $start_row = 21; // 根據您之前的程式碼，全家是從 21 行開始
+                    $template_file = ($action === 'export_orders_711') ? '711-export-example.xlsm' : 'fami-export-example.xls';
+                    $template_path = WFS_PLUGIN_PATH . 'assets/templates/' . $template_file;
+                    if (!file_exists($template_path)) {
+                        wp_die("範本檔案遺失: {$template_file}");
+                    }
+                    $spreadsheet = IOFactory::load($template_path);
+                    $sheet = $spreadsheet->getActiveSheet();
+                    $start_row = ($action === 'export_orders_711') ? 7 : 21;
                     break;
+
                 case 'export_orders_hct_remit':
                 case 'export_orders_hct_cash':
-                    $template_file = 'HCT-export-example.xls';
-                    $start_row = 2;
+                    // 對於新竹物流，我們恢復成從零建立檔案，以確保最高相容性
+                    $spreadsheet = new Spreadsheet();
+                    $sheet = $spreadsheet->getActiveSheet();
+                    $headers = ['序號', '訂單號', '收件人姓名', '收件人地址', '收件人電話', '託運備住', '商品別編號', '商品數量', '材積', '代收貨款', '指定配送日期', '指定配送時間'];
+                    $sheet->fromArray($headers, null, 'A1');
+                    $start_row = 2; // 資料從第二行開始
                     break;
+
                 default:
                     return $redirect_to;
             }
 
-            $template_path = WFS_PLUGIN_PATH . 'assets/templates/' . $template_file;
-            if (!file_exists($template_path)) {
-                wp_die("範本檔案遺失 (Template file not found): {$template_file}");
+            if (!$spreadsheet || !$sheet) {
+                wp_die('無法初始化 Excel 檔案。');
             }
 
-            $spreadsheet = IOFactory::load($template_path);
-            
-            // --- *** 關鍵修正點 *** ---
-            // 直接取得第一個可用的工作表，不再依賴固定的名稱
-            $sheet = $spreadsheet->getActiveSheet();
-
-            if (!$sheet) {
-                wp_die("在範本中找不到任何可用的工作表 (Could not find any active sheet in the template)。");
-            }
-            
-            // 模擬的商品列表
             $products_list = ["特產", "餅乾", "泡麵", "果凍", "飲料"];
             $current_row = $start_row;
 
@@ -124,10 +113,9 @@ class WFS_Order_Export {
                 $order->update_meta_data('_last_exported_date', current_time('mysql'));
                 $order->save();
 
-                // 準備通用資料
                 $recipient_name = $order->get_shipping_last_name() . $order->get_shipping_first_name();
                 $recipient_phone = $order->get_shipping_phone() ?: $order->get_billing_phone();
-                $store_id = $order->get_meta('_shipping_cvs_store_ID');
+                $store_id = $order->get_meta('_shipping_cvs_store_id');
                 $address = $order->get_shipping_state() . $order->get_shipping_city() . $order->get_shipping_address_1() . $order->get_shipping_address_2();
                 $product_mock = $products_list[array_rand($products_list)];
                 $temperatureMeta = $order->get_meta('temperature-layer');
@@ -136,8 +124,7 @@ class WFS_Order_Export {
                 $total_price = $order->get_total() - $order->get_total_refunded();
                 $shipping_fee = $order->get_shipping_total();
                 $item_price = $total_price - $shipping_fee;
-                
-                // --- *** 更新全家匯出的資料順序以符合範本 *** ---
+
                 $rowData = match ($action) {
                     'export_orders_711' => [$recipient_name, $recipient_phone, $store_id, $temperature, $product_mock, $item_price, $shipping_fee],
                     'export_orders_familymart' => [$recipient_name, $recipient_phone, $store_id, $item_price, $shipping_fee, $product_mock, $temperature],
@@ -145,17 +132,14 @@ class WFS_Order_Export {
                     'export_orders_hct_cash' => ["", "SS{$order_id}", $recipient_name, $address, $recipient_phone, $product_mock, "", "1", "3", $total_price, "", "2"],
                     default => [],
                 };
-                
+
                 if (!empty($rowData)) {
-                    // 全家範本有自己的標頭，我們從 A21 開始寫入
-                    $cell_start = ($action === 'export_orders_familymart' && $current_row === 21) ? 'A21' : "A{$current_row}";
-                    $sheet->fromArray($rowData, null, $cell_start);
+                    $sheet->fromArray($rowData, null, "A{$current_row}");
                     $current_row++;
                 }
             }
             
-            // 準備下載
-            $extension = pathinfo($template_file, PATHINFO_EXTENSION);
+            $extension = ($action === 'export_orders_711') ? 'xlsm' : 'xls';
             $content_type = ($extension === 'xlsm') ? 'application/vnd.ms-excel.sheet.macroEnabled.12' : 'application/vnd.ms-excel';
             $writer = ($extension === 'xlsm') ? new Xlsx($spreadsheet) : new Xls($spreadsheet);
 
@@ -169,15 +153,12 @@ class WFS_Order_Export {
             exit;
 
         } catch (\Exception $e) {
-            wp_die('建立 Excel 檔案時發生錯誤 (Error creating Excel file): ' . $e->getMessage());
+            wp_die('建立 Excel 檔案時發生錯誤: ' . $e->getMessage());
         }
         
         return $redirect_to;
     }
 
-    /**
-     * 新增「最近匯出日期」欄位標題。
-     */
     public function add_last_exported_column($columns) {
         $new_columns = [];
         foreach ($columns as $key => $column) {
@@ -189,9 +170,6 @@ class WFS_Order_Export {
         return $new_columns;
     }
 
-    /**
-     * 顯示「最近匯出日期」欄位內容。
-     */
     public function render_last_exported_column($column, $order_id) {
         if ($column === 'last_exported') {
             $order = wc_get_order($order_id);
