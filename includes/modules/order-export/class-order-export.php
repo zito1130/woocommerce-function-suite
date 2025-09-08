@@ -115,7 +115,7 @@ class WFS_Order_Export {
 
                 $recipient_name = $order->get_shipping_last_name() . $order->get_shipping_first_name();
                 $recipient_phone = $order->get_shipping_phone() ?: $order->get_billing_phone();
-                $store_id = $order->get_meta('_shipping_cvs_store_id');
+                $store_id = $order->get_meta('_shipping_cvs_store_ID');
                 $address = $order->get_shipping_state() . $order->get_shipping_city() . $order->get_shipping_address_1() . $order->get_shipping_address_2();
                 $product_mock = $products_list[array_rand($products_list)];
                 $temperatureMeta = $order->get_meta('temperature-layer');
