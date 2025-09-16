@@ -85,7 +85,7 @@ class WFS_Line_Notify {
         // 步驟 3：先對整個包含「替身」的字串進行 URL 編碼
         $encoded_message = rawurlencode($line_message);
 
-        // 步驟 4：將已被編碼的「替身」，手動替換成換行符的編碼 "%0A"
+        // 步驟 4：將已被編碼的「替身」，手動替換成換行符的編碼 "%0A
         $final_message = str_replace(rawurlencode($newline_placeholder), '%0A', $encoded_message);
         $message_for_clipboard = str_replace($newline_placeholder, "\n", $line_message);
         // 步驟 5：建立最終的 URL
@@ -219,7 +219,7 @@ class WFS_Line_Notify {
 
                 function confirmOrderAjax() {
                     // ★★★ 關鍵修正點：使用您指定的方式打開視窗 ★★★
-                    window.open("<?php echo $line_url; ?>", "", "width=600,height=400,resizable=yes,scrollbars=yes");
+                    window.open("<?php echo $line_url; ?>", "", "width=600,height=400");
 
                     fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
                         method: 'POST',
