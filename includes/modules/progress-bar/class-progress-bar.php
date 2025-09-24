@@ -26,13 +26,29 @@ class WFS_Progress_Bar {
     }
 
     /**
-     * AJAX 處理函式
+     * AJAX 處理函式 (*** 已修改：回傳所有供應商的重量 ***)
      */
     public function ajax_get_cart_weight() {
         check_ajax_referer('wfs-progress-nonce', 'nonce');
+        
+        if ( ! class_exists('CM_Cart_Display') ) {
+            wp_send_json_error('Missing dependencies');
+            return;
+        }
+        
+        // 獲取依供應商分組的重量
+        $supplier_weights = CM_Cart_Display::get_cart_weight_by_supplier();
+        
+        // 獲取供應商名稱
+        $supplier_names = [];
+        foreach ($supplier_weights as $supplier_id => $weight) {
+            $supplier_names[$supplier_id] = CM_Cart_Display::get_supplier_display_name($supplier_id);
+        }
+        
         wp_send_json_success([
-            'weight' => WC()->cart->get_cart_contents_weight(),
-            'shipping_class' => $this->get_cart_shipping_class_name(),
+            'weights'         => $supplier_weights, // (*** 修改 ***)
+            'supplier_names'  => $supplier_names,  // (*** 新增 ***)
+            'shipping_class'  => $this->get_cart_shipping_class_name(),
         ]);
     }
 
@@ -65,63 +81,76 @@ class WFS_Progress_Bar {
     /**
      * 準備所有需要傳遞給 JavaScript 的資料。
      */
+/**
+     * 準備所有需要傳遞給 JavaScript 的資料 (*** 已修改：傳遞所有供應商的初始重量 ***)
+     */
     private function get_js_params() {
-    $limits = array_filter((array) get_option('wfs_shipping_weight_limits', []));
-    $shipping_methods_data = [];
+        $limits = array_filter((array) get_option('wfs_shipping_weight_limits', []));
+        $shipping_methods_data = [];
 
-    if (!empty($limits)) {
-        // 1. 取得所有運送區域
-        $shipping_zones = WC_Shipping_Zones::get_zones();
-
-        // 2. 額外加入一個「其他地區」的預設區域
-        $shipping_zones[0] = new WC_Shipping_Zone(0);
-
-        foreach ($shipping_zones as $zone_data) {
-            // 根據不同結構取得 Zone 物件
-            $zone = ($zone_data instanceof WC_Shipping_Zone) ? $zone_data : WC_Shipping_Zones::get_zone($zone_data['id']);
-            
-            if (!$zone) continue;
-
-            // 3. 核心修正：使用 $zone->get_shipping_methods(true) 來獲取該區域中「已啟用」的方式
-            // 參數 true 就代表 "enabled_only"
-            $enabled_methods_in_zone = $zone->get_shipping_methods(true);
-
-            foreach ($enabled_methods_in_zone as $instance_id => $shipping_method) {
-                $method_rate_id = $shipping_method->get_rate_id(); // e.g., 'flat_rate:1'
-
-                // 4. 用運送方式的 rate_id 來比對您在後台設定的重量限制
-                if (isset($limits[$method_rate_id])) {
-                    $shipping_methods_data[] = [
-                        'name'       => $shipping_method->get_title(),
-                        'max_weight' => (float) $limits[$method_rate_id]
-                    ];
+        if (!empty($limits)) {
+            $shipping_zones = WC_Shipping_Zones::get_zones();
+            $shipping_zones[0] = new WC_Shipping_Zone(0);
+            foreach ($shipping_zones as $zone_data) {
+                $zone = ($zone_data instanceof WC_Shipping_Zone) ? $zone_data : WC_Shipping_Zones::get_zone($zone_data['id']);
+                if (!$zone) continue;
+                $enabled_methods_in_zone = $zone->get_shipping_methods(true);
+                foreach ($enabled_methods_in_zone as $instance_id => $shipping_method) {
+                    $method_rate_id = $shipping_method->get_rate_id();
+                    if (isset($limits[$method_rate_id])) {
+                        $shipping_methods_data[] = [
+                            'name'       => $shipping_method->get_title(),
+                            'max_weight' => (float) $limits[$method_rate_id]
+                        ];
+                    }
                 }
+            }
+            uasort($shipping_methods_data, function ($a, $b) {
+                return $a['max_weight'] <=> $b['max_weight'];
+            });
+        }
+        
+        $product_weight = 0;
+        $product_supplier_id = null;
+        if (is_product()) {
+            $product = wc_get_product(get_the_ID());
+            if ($product && class_exists('CM_Cart_Display')) {
+                $product_weight = (float) $product->get_weight();
+                // (*** 新增 ***) 獲取單一商品的供應商 ID
+                $product_supplier_id = CM_Cart_Display::get_item_supplier_id(['data' => $product]);
             }
         }
         
-        // 5. 對最終結果進行排序，確保與後台設定一致
-        uasort($shipping_methods_data, function ($a, $b) {
-            return $a['max_weight'] <=> $b['max_weight'];
-        });
-    }
-    
-    $product_weight = 0;
-    if (is_product()) {
-        $product = wc_get_product(get_the_ID());
-        if ($product) {
-            $product_weight = (float) $product->get_weight();
+        // --- (*** 關鍵修改 ***) ---
+        $initial_supplier_weights = [];
+        $supplier_names = [];
+        if ( class_exists('CM_Cart_Display') ) {
+            // 獲取依供應商分組的重量
+            $initial_supplier_weights = CM_Cart_Display::get_cart_weight_by_supplier();
+            // 獲取供應商名稱
+            foreach ($initial_supplier_weights as $supplier_id => $weight) {
+                $supplier_names[$supplier_id] = CM_Cart_Display::get_supplier_display_name($supplier_id);
+            }
         }
+        // --- (*** 修改完畢 ***) ---
+
+        return [
+            'shipping_methods'        => array_values($shipping_methods_data),
+            'i18n'                    => ['current_weight' => __('目前總重', 'woocommerce-function-suite')],
+            
+            // (*** 修改 ***) 傳遞商品重量 *和* 其供應商 ID
+            'product_weight'          => $product_weight,
+            'product_supplier_id'     => $product_supplier_id, 
+
+            // (*** 修改 ***) 傳遞 *所有* 供應商的重量和名稱
+            'initial_supplier_weights' => $initial_supplier_weights,
+            'supplier_names'           => $supplier_names,
+            
+            'cart_shipping_class'     => $this->get_cart_shipping_class_name(),
+            'nonce'                   => wp_create_nonce('wfs-progress-nonce'),
+            'ajax_url'                => admin_url('admin-ajax.php'),
+        ];
     }
-    
-    return [
-        'shipping_methods'        => array_values($shipping_methods_data), // 重新索引陣列
-        'i18n'                    => ['current_weight' => __('目前總重', 'woocommerce-function-suite')],
-        'product_weight'          => $product_weight,
-        'cart_shipping_class'     => $this->get_cart_shipping_class_name(),
-        'nonce'                   => wp_create_nonce('wfs-progress-nonce'),
-        'ajax_url'                => admin_url('admin-ajax.php'),
-    ];
-}
 
     /**
      * 輔助函式：取得目前購物車的運送類別名稱。
