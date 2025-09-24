@@ -22,12 +22,12 @@ class WFS_Discord_Notify {
             return;
         }
 
-        add_action('woocommerce_new_order', [$this, 'send_new_order_notification'], 10, 1);
+        add_action('woocommerce_order_status_processing', [$this, 'send_new_order_notification'], 20, 1);
         add_action('woocommerce_low_stock', [$this, 'send_low_stock_notification'], 10, 1);
     }
 
     /**
-     * 發送新訂單的通知。
+     * 發送新訂單的通知。(*** 已修改：支援多筆訂單 ***)
      */
     public function send_new_order_notification($order_id) {
         if (!$order_id) return;
@@ -35,7 +35,24 @@ class WFS_Discord_Notify {
         $order = wc_get_order($order_id);
         if (!$order) return;
 
+        // --- (*** 關鍵修正 ***) ---
+        // 1. 如果這是一張子訂單，就直接退出，避免重複通知
+        if ( $order->get_parent_id() > 0 ) {
+            return;
+        }
+        
+        // 2. 檢查是否已發送過 (現在檢查父訂單)
         if ($order->get_meta('_discord_notification_sent')) return;
+        
+        // 3. 獲取所有相關訂單
+        $all_orders = [];
+        if ( $order->get_meta('_cm_order_split_parent') ) {
+            $child_orders = wc_get_orders(['parent' => $order_id, 'limit' => -1]);
+            $all_orders = array_merge([$order], $child_orders);
+        } else {
+            $all_orders = [$order];
+        }
+        // --- (*** 修正完畢 ***) ---
 
         $fields = [];
         
@@ -51,15 +68,32 @@ class WFS_Discord_Notify {
         
         $fields[] = ['name' => '---', 'value' => "\u{200B}", 'inline' => false];
 
-        $order_total_raw = $order->get_formatted_order_total();
-        $order_total_clean = html_entity_decode(strip_tags($order_total_raw));
+        // --- (*** 關鍵修正：計算真實總金額 ***) ---
+        $grand_total = 0;
+        foreach ($all_orders as $sub_order) {
+            $grand_total += $sub_order->get_total();
+        }
+        // 因為 cart-manager 會複製運費，所以我們需要減去多餘的運費
+        if (count($all_orders) > 1) {
+             $grand_total -= ($order->get_shipping_total() * (count($all_orders) - 1));
+        }
+        $order_total_clean = html_entity_decode(strip_tags(wc_price($grand_total, ['currency' => $order->get_currency()])));
+        // --- (*** 修正完畢 ***) ---
 
         $fields[] = ['name' => '訂單總額', 'value' => $order_total_clean, 'inline' => true];
         $fields[] = ['name' => '付款方式', 'value' => $order->get_payment_method_title(), 'inline' => true];
+        
+        // (*** 關鍵修改：組合訂單編號 ***)
+        $order_numbers = [];
+        foreach($all_orders as $sub_order) {
+            $order_numbers[] = "#" . $sub_order->get_order_number();
+        }
+        $description = "訂單編號：" . implode(', ', $order_numbers);
+
 
         $embed = [
             'title' => '🎉 新訂單成立！',
-            'description' => "訂單編號： **#{$order->get_order_number()}**",
+            'description' => $description, // 使用新的描述
             'color' => hexdec('58B957'),
             'fields' => $fields,
             'footer' => ['text' => get_bloginfo('name') . ' - ' . wp_date('Y-m-d H:i:s')],
@@ -68,6 +102,7 @@ class WFS_Discord_Notify {
         $response = $this->send_to_discord(['embeds' => [$embed]]);
 
         if (!is_wp_error($response)) {
+            // 在父訂單上標記已發送
             $order->update_meta_data('_discord_notification_sent', 'true');
             $order->save();
         }
