@@ -9,7 +9,6 @@ jQuery(function($) {
     let xhr;
     let debounceTimer;
 
-    // --- (*** 已修正：變數名稱 $selected_method -> $selectedMethod ***) ---
     function controlPlaceOrderButton() {
         const $selectedMethod = $('input.shipping_method:checked');
         const isMethodSelected = $selectedMethod.length > 0;
@@ -22,24 +21,21 @@ jQuery(function($) {
         }
     }
 
-    // --- (*** 已修正：改用更可靠的資料判斷 ***) ---
     function updateWeightDisplay(data) {
         $('tr.wfs-cart-weight-info').remove();
         const $insertBefore = $('tr.woocommerce-shipping-totals');
         if (!$insertBefore.length) return;
 
-        // *** 關鍵修正：直接檢查 data.weights 物件是否存在 ***
+        // *** 使用 || 0 來提供預設值，防止 NaN ***
         if (data.weights && Object.keys(data.weights).length > 0) {
-            // --- 新格式：依供應商顯示 ---
             $.each(data.weights, function(supplierId, weight) {
                 const supplierName = data.names[supplierId] || '未知供應商';
-                const weightText = parseFloat(weight).toFixed(2) + ' kg';
+                const weightText = (parseFloat(weight) || 0).toFixed(2) + ' kg'; // <-- 修正點
                 const rowHtml = '<tr class="wfs-cart-weight-info"><th>' + supplierName + ' 重量</th><td>' + weightText + '</td></tr>';
                 $insertBefore.before(rowHtml);
             });
         } else if (data.hasOwnProperty('weight')) {
-            // --- 舊格式：顯示總重量 (Fallback) ---
-            const weightText = parseFloat(data.weight).toFixed(2) + ' kg';
+            const weightText = (parseFloat(data.weight) || 0).toFixed(2) + ' kg'; // <-- 修正點
             const rowHtml = '<tr class="wfs-cart-weight-info"><th>訂單總重量</th><td>' + weightText + '</td></tr>';
             $insertBefore.before(rowHtml);
         }
@@ -72,24 +68,22 @@ jQuery(function($) {
                     $methodLi.removeClass('wfs-shipping-method--overweight');
 
                     if (data.limits && data.limits[methodId]) {
-                        const maxWeight = parseFloat(data.limits[methodId]);
+                        // *** 使用 || 0 來提供預設值，防止 NaN ***
+                        const maxWeight = parseFloat(data.limits[methodId]) || 0; // <-- 修正點
                         let isOverweight = false;
                         let overweightMessage = '';
 
-                        // *** 關鍵修正：直接檢查 data.weights 物件是否存在 ***
                         if (data.weights) {
-                            // --- 新格式：檢查 *任何* 供應商是否超重 ---
                             $.each(data.weights, function(supplierId, weight) {
-                                if (parseFloat(weight) > maxWeight) {
+                                if ((parseFloat(weight) || 0) > maxWeight) { // <-- 修正點
                                     isOverweight = true;
                                     const supplierName = data.names[supplierId] || '未知供應商';
                                     overweightMessage = supplierName + ' 已超過 ' + maxWeight + ' kg 重量限制';
-                                    return false; // 中斷迴圈
+                                    return false;
                                 }
                             });
                         } else if (data.hasOwnProperty('weight')) {
-                            // --- 舊格式：檢查總重 (Fallback) ---
-                            if (parseFloat(data.weight) > maxWeight) {
+                            if ((parseFloat(data.weight) || 0) > maxWeight) { // <-- 修正點
                                 isOverweight = true;
                                 overweightMessage = '超過 ' + maxWeight + ' kg 重量限制';
                             }
