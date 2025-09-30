@@ -28,6 +28,9 @@ class WFS_Progress_Bar {
     /**
      * AJAX 處理函式 (*** 已修改：回傳所有供應商的重量 ***)
      */
+    /**
+     * AJAX 處理函式 (*** 已修改：回傳所有供應商的溫層 ***)
+     */
     public function ajax_get_cart_weight() {
         check_ajax_referer('wfs-progress-nonce', 'nonce');
         
@@ -36,19 +39,37 @@ class WFS_Progress_Bar {
             return;
         }
         
-        // 獲取依供應商分組的重量
         $supplier_weights = CM_Cart_Display::get_cart_weight_by_supplier();
-        
-        // 獲取供應商名稱
         $supplier_names = [];
+        $supplier_shipping_classes = []; // (*** 全新 ***)
+
+        // 將商品依供應商分組
+        $supplier_groups = [];
+        foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+            $supplier_id = CM_Cart_Display::get_item_supplier_id($cart_item);
+            $supplier_groups[$supplier_id][] = $cart_item;
+        }
+
         foreach ($supplier_weights as $supplier_id => $weight) {
             $supplier_names[$supplier_id] = CM_Cart_Display::get_supplier_display_name($supplier_id);
+            // (*** 全新 ***) 獲取該供應商的第一個商品的溫層
+            $first_item = reset($supplier_groups[$supplier_id]);
+            $product = $first_item['data'];
+            if ($product) {
+                $shipping_class_slug = $product->get_shipping_class();
+                if ($shipping_class_slug) {
+                    $term = get_term_by('slug', $shipping_class_slug, 'product_shipping_class');
+                    $supplier_shipping_classes[$supplier_id] = $term ? $term->name : '';
+                } else {
+                    $supplier_shipping_classes[$supplier_id] = __('常溫', 'cart-manager');
+                }
+            }
         }
         
         wp_send_json_success([
-            'weights'         => $supplier_weights, // (*** 修改 ***)
-            'supplier_names'  => $supplier_names,  // (*** 新增 ***)
-            'shipping_class'  => $this->get_cart_shipping_class_name(),
+            'weights'                   => $supplier_weights,
+            'supplier_names'            => $supplier_names,
+            'supplier_shipping_classes' => $supplier_shipping_classes, // (*** 全新 ***)
         ]);
     }
 
@@ -79,10 +100,7 @@ class WFS_Progress_Bar {
     }
     
     /**
-     * 準備所有需要傳遞給 JavaScript 的資料。
-     */
-/**
-     * 準備所有需要傳遞給 JavaScript 的資料 (*** 已修改：傳遞所有供應商的初始重量 ***)
+     * 準備所有需要傳遞給 JavaScript 的資料 (*** 已修改：傳遞所有供應商的溫層 ***)
      */
     private function get_js_params() {
         $limits = array_filter((array) get_option('wfs_shipping_weight_limits', []));
@@ -116,37 +134,50 @@ class WFS_Progress_Bar {
             $product = wc_get_product(get_the_ID());
             if ($product && class_exists('CM_Cart_Display')) {
                 $product_weight = (float) $product->get_weight();
-                // (*** 新增 ***) 獲取單一商品的供應商 ID
                 $product_supplier_id = CM_Cart_Display::get_item_supplier_id(['data' => $product]);
             }
         }
         
-        // --- (*** 關鍵修改 ***) ---
         $initial_supplier_weights = [];
         $supplier_names = [];
+        $supplier_shipping_classes = []; // (*** 全新 ***)
+
         if ( class_exists('CM_Cart_Display') ) {
-            // 獲取依供應商分組的重量
             $initial_supplier_weights = CM_Cart_Display::get_cart_weight_by_supplier();
-            // 獲取供應商名稱
-            foreach ($initial_supplier_weights as $supplier_id => $weight) {
+            
+            $supplier_groups = [];
+            foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+                $supplier_id = CM_Cart_Display::get_item_supplier_id($cart_item);
+                $supplier_groups[$supplier_id][] = $cart_item;
+            }
+
+            foreach (array_keys($initial_supplier_weights) as $supplier_id) {
                 $supplier_names[$supplier_id] = CM_Cart_Display::get_supplier_display_name($supplier_id);
+                
+                if(isset($supplier_groups[$supplier_id])) {
+                    $first_item = reset($supplier_groups[$supplier_id]);
+                    $product = $first_item['data'];
+                    if ($product) {
+                        $shipping_class_slug = $product->get_shipping_class();
+                        if ($shipping_class_slug) {
+                            $term = get_term_by('slug', $shipping_class_slug, 'product_shipping_class');
+                            $supplier_shipping_classes[$supplier_id] = $term ? $term->name : '';
+                        } else {
+                            $supplier_shipping_classes[$supplier_id] = __('常溫', 'cart-manager');
+                        }
+                    }
+                }
             }
         }
-        // --- (*** 修改完畢 ***) ---
 
         return [
             'shipping_methods'        => array_values($shipping_methods_data),
             'i18n'                    => ['current_weight' => __('目前總重', 'woocommerce-function-suite')],
-            
-            // (*** 修改 ***) 傳遞商品重量 *和* 其供應商 ID
             'product_weight'          => $product_weight,
             'product_supplier_id'     => $product_supplier_id, 
-
-            // (*** 修改 ***) 傳遞 *所有* 供應商的重量和名稱
             'initial_supplier_weights' => $initial_supplier_weights,
             'supplier_names'           => $supplier_names,
-            
-            'cart_shipping_class'     => $this->get_cart_shipping_class_name(),
+            'supplier_shipping_classes' => $supplier_shipping_classes, // (*** 全新 ***)
             'nonce'                   => wp_create_nonce('wfs-progress-nonce'),
             'ajax_url'                => admin_url('admin-ajax.php'),
         ];
